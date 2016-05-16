@@ -32,6 +32,7 @@ Adafruit_NeoPixel dots[20] =
 };
 
 void setup() {
+  //Serial.begin(9600);
   randomSeed(analogRead(A0));
   for (int i = 0; i < TOTALSTRIPS; i++) {
      dots[i].begin();
