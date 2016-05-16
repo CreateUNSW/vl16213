@@ -1,5 +1,6 @@
 /*-- Define Pins --*/
-#define LIM 1018  //The point at which the sensor switches between touch and release
+#define LIM 1015  //The point at which the sensor switches between touch and release
+#define BOUNCE 30
 
 /*-- Set up Variables --*/
 boolean States[16]; //set states to off
@@ -28,4 +29,5 @@ void loop() {
       States[i] = false;            //Change state to untouched
     }
   }
+  delay(BOUNCE);
 }
