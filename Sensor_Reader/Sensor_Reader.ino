@@ -1,6 +1,6 @@
 /*-- Define Pins --*/
 #define LIM 1015  //The point at which the sensor switches between touch and release
-#define BOUNCE 1000 //Number of Cycles to debounce
+#define BOUNCE 400 //Number of Cycles to debounce
 
 /*-- Set up Variables --*/
 boolean States[16]; //set states to off
