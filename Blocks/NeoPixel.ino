@@ -25,6 +25,8 @@
 #define STRIP18 19
 #define STRIP19 20
 #define STRIP20 21
+#define STRIP21 22
+#define STRIP22 23
 
 
 
@@ -48,6 +50,8 @@ Adafruit_NeoPixel strip_17 = Adafruit_NeoPixel(NUMPIXELS, STRIP17, NEO_GRB + NEO
 Adafruit_NeoPixel strip_18 = Adafruit_NeoPixel(NUMPIXELS, STRIP18, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel strip_19 = Adafruit_NeoPixel(NUMPIXELS, STRIP19, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel strip_20 = Adafruit_NeoPixel(NUMPIXELS, STRIP20, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip_21 = Adafruit_NeoPixel(NUMPIXELS, STRIP21, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip_22 = Adafruit_NeoPixel(NUMPIXELS, STRIP22, NEO_GRB + NEO_KHZ800);
 
 
 void setupStrips(){
@@ -71,9 +75,11 @@ void setupStrips(){
   strip_18.begin();
   strip_19.begin();
   strip_20.begin();
+  strip_21.begin();
+  strip_22.begin();  
 }
 
-void writeStrips(byte pixelMatrix[20][NUMPIXELS][3]){
+void writeStrips(byte pixelMatrix[22][NUMPIXELS][3]){
   
   for(int i=0;i<NUMPIXELS;i++){strip_1.setPixelColor(i, strip_1.Color(pixelMatrix[0][i][0],pixelMatrix[0][i][1],pixelMatrix[0][i][2]));}
   strip_1.show();
@@ -134,5 +140,11 @@ void writeStrips(byte pixelMatrix[20][NUMPIXELS][3]){
 
   for(int i=0;i<NUMPIXELS;i++){strip_20.setPixelColor(i, strip_20.Color(pixelMatrix[19][i][0],pixelMatrix[19][i][1],pixelMatrix[19][i][2]));}
   strip_20.show();
+  
+  for(int i=0;i<NUMPIXELS;i++){strip_21.setPixelColor(i, strip_21.Color(pixelMatrix[20][i][0],pixelMatrix[20][i][1],pixelMatrix[20][i][2]));}
+  strip_21.show();
+  
+  for(int i=0;i<NUMPIXELS;i++){strip_22.setPixelColor(i, strip_22.Color(pixelMatrix[21][i][0],pixelMatrix[21][i][1],pixelMatrix[21][i][2]));}
+  strip_22.show();
 }
 
