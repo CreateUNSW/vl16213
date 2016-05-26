@@ -1,29 +1,24 @@
-/*-- Define Pins --*/
-#define LIM 1010 //The point at which the sensor switches between touch and release
-#define BOUNCE_TIME 100 //Number of Cycles to debounce
+/*-- Define Variables --*/
+#define BOUNCE_TIME 1500 //Number of milliseconds to debounce
 
 /*-- Set up Variables --*/
-int Pins[16] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15};
-int Bounce;
-double LastTime;
-int maxIndex;
-int lastMax;
-int temp;
+int bounce = 0;
+double nextTime = 0;
+int maxIndex = -1;
+int lastMax = 0;
+int temp = 0;
 int value = 0;
 
-int Map[16] =   {1,2,3,4,5,6,7,8,9,10 ,11 ,12,13,14,15,16};
-int Sense[16] = {1010,1010,1010,1010,1010,1010,1010,1010,1010,1010,1010,1020,1010,1010,1010};
+/*-- Sey up Arrays --*/
+int pins[16] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15};
+int box[16] =   {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+int sense[16] = {1010,1010,1010,1010,1010,1010,1010,1010,1010,1010,1010,1020,1010,1010,1010};
 
 void setup() {
   /*-- Set Analog Pins --*/
   for (int i = 0; i < 16; i++){
-    pinMode(Pins[i], INPUT);  //set analog pins for input
-    digitalWrite(Pins[i], HIGH);  //Pull up analog pins
-    Bounce = 0;
-    LastTime = 0;
-    lastMax = 0;
-    maxIndex = -1;
-    temp = 0;
+    pinMode(pins[i], INPUT);  //set analog pins for input
+    digitalWrite(pins[i], HIGH);  //Pull up analog pins
   }
   
   /*-- Set up Serial --*/
@@ -31,26 +26,28 @@ void setup() {
 }
 
 void loop() {
-  if(Bounce == 0){ //if 300ms since last touch
+  if(bounce == 0){ //if 300ms since last touch
     for(int i = 0; i < 16; i++){      //cycle through pins
-      temp = analogRead(Pins[i]);
-      
+      temp = analogRead(pins[i]);
+
+      /*
       Serial.print("BoxIndex: ");
-      Serial.print(Map[i]);        //Send information on pin touched
+      Serial.print(box[i]);        //Send information on pin touched
       Serial.print("          Pressure: ");
       Serial.println(temp);
+      */
       
-      if(temp < Sense[i]) {  //Check if the sensor has detected touch
-        value = temp - Sense[i];
+      if(temp < sense[i]) {  //Check if the sensor has detected touch
+        value = sense[i] - temp;
         if(value > lastMax){   //if touch greater than the last maximum 
-          maxIndex = Map[i]; //save pin index
+          maxIndex = box[i]; //save pin index
           lastMax = value;  //save pressure
         }
+        bounce = 1; //set debounce
+        nextTime = millis() + BOUNCE_TIME;  //save time at which checking restarts
       }
     }
     
-    Bounce = 1; //set debounce
-    LastTime = millis();  //save last time since bounced
 
     //Serial.println("max box = "); //
     if(maxIndex!=-1 ){
@@ -59,8 +56,8 @@ void loop() {
     maxIndex = -1;  //reset maxIndex to something random
     lastMax = 0;
   } else {
-      if((millis() - LastTime)> BOUNCE_TIME){
-        Bounce = 0;
-      }
+    if(millis() > nextTime){
+      bounce = 0;
+    }
   }
 }  
