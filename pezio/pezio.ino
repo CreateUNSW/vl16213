@@ -1,63 +1,41 @@
-/*-- Define Variables --*/
-#define BOUNCE_TIME 1500 //Number of milliseconds to debounce
+#define THRESH 100
+#define THRESH_TIME 1500
 
-/*-- Set up Variables --*/
-int bounce = 0;
-double nextTime = 0;
-int maxIndex = -1;
-int lastMax = 0;
-int temp = 0;
-int value = 0;
+int readings[16];
+long times[16];
+int currReading;
+boolean detect[16];
 
-/*-- Sey up Arrays --*/
-int pins[16] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15};
-int box[16] =   {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-int sense[16] = {1010,1010,1010,1010,1010,1010,1010,1010,1010,1010,1010,1020,1010,1010,1010};
+// 5 not sensitive enough
 
 void setup() {
-  /*-- Set Analog Pins --*/
-  for (int i = 0; i < 16; i++){
-    pinMode(pins[i], INPUT);  //set analog pins for input
-    digitalWrite(pins[i], HIGH);  //Pull up analog pins
-  }
-  
-  /*-- Set up Serial --*/
+  // put your setup code here, to run once:
   Serial.begin(9600);
+  delay(1000);
+  for(int i = 0; i < 16; ++i){
+    readings[i] = analogRead(i);
+    detect[i] = false;
+    times[i] = millis();
+  }
 }
 
 void loop() {
-  if(bounce == 0){ //if 300ms since last touch
-    for(int i = 0; i < 16; i++){      //cycle through pins
-      temp = analogRead(pins[i]);
-
-      /*
-      Serial.print("BoxIndex: ");
-      Serial.print(box[i]);        //Send information on pin touched
-      Serial.print("          Pressure: ");
-      Serial.println(temp);
-      */
-      
-      if(temp < sense[i]) {  //Check if the sensor has detected touch
-        value = sense[i] - temp;
-        if(value > lastMax){   //if touch greater than the last maximum 
-          maxIndex = box[i]; //save pin index
-          lastMax = value;  //save pressure
+  // put your main code here, to run repeatedly:
+  for(byte i  = 0; i < 16; ++i){
+    currReading = analogRead(i);
+    if(abs(currReading-readings[i]) > THRESH){
+      //if(millis() - times[i] > THRESH_TIME){
+        detect[i] = true;
+        //Serial.println((int)i+1);
+        Serial.write(i+1);
+        delay(500);
+        for(int j = 0; j < 16; ++j){
+          readings[j] = analogRead(j);
         }
-        bounce = 1; //set debounce
-        nextTime = millis() + BOUNCE_TIME;  //save time at which checking restarts
-      }
-    }
-    
-
-    //Serial.println("max box = "); //
-    if(maxIndex!=-1 ){
-      Serial.println(maxIndex);
-    }
-    maxIndex = -1;  //reset maxIndex to something random
-    lastMax = 0;
-  } else {
-    if(millis() > nextTime){
-      bounce = 0;
+      //}
+    } else {
+      detect[i] = false;
+      readings[i] = currReading;
     }
   }
-}  
+}

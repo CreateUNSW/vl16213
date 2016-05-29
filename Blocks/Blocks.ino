@@ -1,28 +1,17 @@
 #include <Adafruit_NeoPixel.h>
 #include <avr/power.h>
 #include "Blocks.h"
-#include <SoftwareSerial.h>
-
-// set this to the hardware serial port you wish to use
-#define HWSERIAL Serial1
-
-SoftwareSerial mySerial(0, 1); // RX, TX
 
 #define NUMPIXELS 45 
 #define NUMBLOCKS 18
 
 byte pixelMatrix[22][NUMPIXELS][3];
-//byte *pointer = &pixelMatrix;
-//*(pointer+3) = 4;
 
 byte redArray[4] =    {125, 125,  125,  0};
 byte greenArray[4] =  {125, 125,  0,    0};
 byte blueArray[4] =   {125,   0,  0,  255};
 
 blockVar blocks[NUMBLOCKS];
-String inString = "";
-
-int blockToChange = -1;
 
 void setup() {
  //Front
@@ -46,7 +35,7 @@ void setup() {
  blocks[13] = {15,13,19,23,1};
  blocks[14] = {15,24,19,34,3};
  blocks[15] = {15,36,19,45,4};*/
-/* //right
+//right
   blocks[0] = {0, 0, 6, 13, 0};
   blocks[1] = {0, 14, 6, 20, 1};
   blocks[2] = {0, 22, 3, 29, 2};
@@ -65,7 +54,7 @@ void setup() {
   blocks[15] = {20, 7, 21, 16, 1};
   blocks[16] = {15, 15, 21, 21, 2};  
   blocks[17] = {17, 22, 21, 29, 3};  
-  blocks[18] = {15, 30, 21, 44, 1};*/
+  blocks[18] = {15, 30, 21, 44, 1};
   // Left
 /*  blocks[0] = {0, 1, 7, 15, 1};
   blocks[1] = {8, 1, 19, 15, 2};
@@ -84,6 +73,9 @@ void setup() {
   blocks[14] = {18, 1, 21, 15, 0};
   blocks[15] = {18, 17, 21, 31, 1};
   blocks[16] = {18, 33, 21, 44, 2};*/
+
+  //back
+  /*
  blocks[0] = {0,0,9,4,0};
  blocks[1]={0,6,9,14,1};
  blocks[2]={0,15,4,26,2};
@@ -106,45 +98,30 @@ void setup() {
 
  blocks[16]={16,21,19,33,2};
  blocks[17]={16,36,19,38,1};
+ */
  
  delay(1500);
  setupStrips();
  Serial.begin(9600);
- HWSERIAL.begin(9600);
+ Serial1.begin(9600);
 }
 
 void loop() {
-    writeStrips(pixelMatrix);    
-    while (HWSERIAL.available() > 0) {
-      int inChar = HWSERIAL.read();
-      //if (isDigit(inChar)) {
-        // convert the incoming byte to a char
-        // and add it to the string:
-        inString += (char)inChar;
-      //}
-      // if you get a newline, print the string,
-      // then the string's value:
-      if (inChar == '\n') {
-        blockToChange = inString.toInt();
-        Serial.print("Value:");
-        Serial.println(inString.toInt());
-        // clear the string for new input:
-        inString = "";
-      }
-    }//*/
-    for(int i; i<NUMBLOCKS; i++){
-      if(i == blockToChange){
-         if(blocks[i].curColour==3){
-          blocks[i].curColour=0;
-         }else{
-          blocks[i].curColour++;
-         }
-         blockToChange = -1;
-      }  
+  //writeStrips(pixelMatrix);
+  Serial.println("waiting");    
+  while(!Serial1.available()){}
+  Serial.println("received");
+  byte i = Serial1.read();
+  Serial.println((int)i);
+  if( i < 18 ){
+    if(blocks[i].curColour==3){
+      blocks[i].curColour=0;
+    }else{
+      blocks[i].curColour++;
     }
-    for(int i; i<NUMBLOCKS; i++){
-      block(blocks[i].x,blocks[i].y,blocks[i].xEnd,blocks[i].yEnd,redArray[blocks[i].curColour],greenArray[blocks[i].curColour],blueArray[blocks[i].curColour]);
-    }
+  
+    block(blocks[i].x,blocks[i].y,blocks[i].xEnd,blocks[i].yEnd,redArray[blocks[i].curColour],greenArray[blocks[i].curColour],blueArray[blocks[i].curColour]);
+  }
 }
 
 void block(int X, int Y, int Length, int Height, byte R, byte G, byte B){
