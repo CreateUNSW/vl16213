@@ -5,6 +5,11 @@
 #define NUMPIXELS 45 
 #define NUMBLOCKS 18
 
+#define RED 0
+#define BLUE 1
+#define YELLOW 2
+#define WHITE 3
+
 byte pixelMatrix[22][NUMPIXELS][3];
 
 byte redArray[4] =    {125, 125,  125,  0};
@@ -124,8 +129,35 @@ void loop() {
   }
 }
 
-void block(int X, int Y, int Length, int Height, byte R, byte G, byte B){
+void block(int X, int Y, int Length, int Height, byte colour){
   uint16_t x, y;
+  byte R, G, B;
+  switch (colour) {
+    case RED:
+        R = 90;
+        G = 0;
+        B = 0;
+        break;
+    case BLUE:
+        R = 0;
+        G = 0;
+        B = 90;
+        break;
+    case YELLOW:
+        R = 90;
+        G = 90;
+        B = 0;    
+        break;
+    case WHITE:
+        R = 90;
+        G = 90;
+        B = 90;    
+        break;
+    default:
+        R = 0;
+        G = 0;
+        B = 0;
+  }
   for(x = X;  x<=Length; x++){
     for(y = Y; y<=Height; y++){
       pixelMatrix[x][y][0] = R;
