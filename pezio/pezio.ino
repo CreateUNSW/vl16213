@@ -1,40 +1,49 @@
+// minimum amount of movement between readings to be counted as a "hit"
 #define THRESH 100
-#define THRESH_TIME 1500
 
+// array for storing the previous reading history
 int readings[16];
-long times[16];
-int currReading;
-boolean detect[16];
 
-// 5 not sensitive enough
+int currReading;
 
 void setup() {
-  // put your setup code here, to run once:
+  // start serial communication from arduino to teensy
   Serial.begin(9600);
   delay(1000);
+  // initialise state of all readings
   for(int i = 0; i < 16; ++i){
     readings[i] = analogRead(i);
-    detect[i] = false;
-    times[i] = millis();
   }
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  // read through all 16 sensors
   for(byte i  = 0; i < 16; ++i){
+    // get a sensor reading
     currReading = analogRead(i);
+
+    /**SPECIAL CASES FOR CERTAIN SIDES, FAULTY SENSORS**/
+    // bad sensor on back side
+    /*if(i == 5){
+      continue;
+    }*/
+    // bad sensor on the front side
+    /*if (i == 10){
+      continue;
+    }*/
+
+    // if the sensor movement is above the threshold
     if(abs(currReading-readings[i]) > THRESH){
-      //if(millis() - times[i] > THRESH_TIME){
-        detect[i] = true;
-        //Serial.println((int)i+1);
-        Serial.write(i+1);
-        delay(500);
-        for(int j = 0; j < 16; ++j){
-          readings[j] = analogRead(j);
-        }
-      //}
+      // send the sensor number to the Teensy
+      Serial.write(i);
+      // wait for vibration to subside
+      delay(500);
+      // reinitialise readings in all sensors
+      for(int j = 0; j < 16; ++j){
+        readings[j] = analogRead(j);
+      }
     } else {
-      detect[i] = false;
+      // otherwise, update history
       readings[i] = currReading;
     }
   }
