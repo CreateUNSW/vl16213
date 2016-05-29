@@ -120,6 +120,10 @@ void setup() {
     blocks[17]={16,36,19,38,1};
     numBlocks = 18;
   }
+
+  for(int i = 0; i < numBlocks; ++i){
+    block(blocks[i].x,blocks[i].y,blocks[i].xEnd,blocks[i].yEnd,blocks[i].curColour);
+  }
  
   delay(1500);
   setupStrips();
@@ -128,7 +132,7 @@ void setup() {
 }
 
 void loop() {
-  //writeStrips(pixelMatrix);
+  writeStrips(pixelMatrix);
   Serial.println("waiting");    
   while(!Serial1.available()){}
   Serial.println("received");
@@ -145,24 +149,24 @@ void block(int X, int Y, int Length, int Height, byte colour){
   byte R, G, B;
   switch (colour) {
     case RED:
-        R = 90;
+        R = 70;
         G = 0;
         B = 0;
         break;
     case BLUE:
         R = 0;
         G = 0;
-        B = 90;
+        B = 70;
         break;
     case YELLOW:
-        R = 90;
-        G = 90;
+        R = 45;
+        G = 45;
         B = 0;    
         break;
     case WHITE:
-        R = 90;
-        G = 90;
-        B = 90;    
+        R = 30;
+        G = 30;
+        B = 30;    
         break;
     default:
         R = 0;
