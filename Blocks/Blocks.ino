@@ -7,7 +7,7 @@
 // maximum number of blocks in a side
 #define NUMBLOCKS 19
 // global variable stores number of blocks in this side
-int numBlocks = 16;
+int numBlocks;
 
 // enumeration for sides
 typedef enum {FRONT, LEFT, RIGHT, BACK} side_t;
@@ -27,6 +27,16 @@ byte pixelMatrix[22][NUMPIXELS][3];
 // blocks array for mondrian side
 blockVar blocks[NUMBLOCKS];
 
+// sensor to box map matrix
+int *sensorBox;
+
+// matrix definitions for each side
+int boxBack[16] = {14,17,15,12,10,9,3,8,4,1,5,2,0,7,13,16}; //back
+int boxLeft[16] = {2,10,16,1,9,5,8,14,4,7,12,13,0,3,11,15}; //left
+int boxFront[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}; //front
+// todo: boxRight
+int boxRight[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}; //front
+
 void setup() {
   
  // front side block definition
@@ -38,8 +48,8 @@ void setup() {
    
    blocks[4] = {5,1,9,11,0};
    blocks[5] = {5,12,9,23,1};
-   blocks[6] = {5,24,9,34,3};
-   blocks[7] = {5,36,9,45,4};
+   blocks[6] = {5,24,9,34,2};
+   blocks[7] = {5,36,9,45,3};
   
    blocks[8] = {10,1,14,11,0};
    blocks[9] = {10,12,14,23,1};
@@ -48,8 +58,10 @@ void setup() {
   
    blocks[12] = {15,1,19,11,0};
    blocks[13] = {15,12,19,23,1};
-   blocks[14] = {15,24,19,34,3};
-   blocks[15] = {15,36,19,45,4};
+   blocks[14] = {15,24,19,34,2};
+   blocks[15] = {15,36,19,45,3};
+   numBlocks = 16;
+   sensorBox = boxFront;
  }
  
   // right side block definition
@@ -78,6 +90,7 @@ void setup() {
     blocks[17] = {17, 22, 21, 29, 3};
     blocks[18] = {15, 30, 21, 44, 1};
     numBlocks = 19;
+    sensorBox = boxRight;
   }
   
   // left side block definition
@@ -104,6 +117,7 @@ void setup() {
     
     blocks[16] = {18, 33, 21, 44, 2};
     numBlocks = 17;
+    sensorBox = boxLeft;
   }
 
   // back side block definition
@@ -115,8 +129,8 @@ void setup() {
     
     blocks[4]={5,23,9,26,1};
     blocks[5]={0,28,9,31,0};
-    blocks[6]={0,32,9,35,3};
-    blocks[7]={0,37,3,44,4};
+    blocks[6]={0,32,9,35,2};
+    blocks[7]={0,37,3,44,3};
     
     blocks[8]={4,37,12,44,0};
     blocks[9]={10,0,14,4,2};
@@ -131,6 +145,7 @@ void setup() {
     blocks[16]={16,21,19,33,2};
     blocks[17]={16,36,19,38,1};
     numBlocks = 18;
+    sensorBox = boxBack;
   }
 
   // initialise frame with block colours
@@ -153,21 +168,25 @@ void loop() {
   while(!Serial1.available()){}
   
   // read incoming sensor identifier
-  byte i = Serial1.read();
+  byte index = Serial1.read();
 
   // debug output
   Serial.println((int)i);
 
-  // sanity check for i
-  if( i < numBlocks ){
-    // update respective block
-    // TODO: Needs map to correct block
+  // sanity check for index
+  if( index < 16 ){
+    // get respective box index
+    i = sensorBox[index];
+
+    // increment colour through cycle of 0,1,2,3
     blocks[i].curColour = (blocks[i].curColour+1)%4;
+
+    // update block in frame
     block(blocks[i].x,blocks[i].y,blocks[i].xEnd,blocks[i].yEnd,blocks[i].curColour);
   }
 }
 
-void block(int X, int Y, int Length, int Height, int colour){
+void block(int startX, int startY, int endX, int endY, int colour){
   uint16_t x, y;
   byte R, G, B;
   // switch case colours: do not increase brightnesses please
@@ -198,10 +217,8 @@ void block(int X, int Y, int Length, int Height, int colour){
         B = 0;
   }
   
-  // this iteration looks strange:
-  // it goes to length & height, not length + x and height + y
-  for(x = X;  x<=Length; x++){
-    for(y = Y; y<=Height; y++){
+  for(x = startX;  x<=endX; x++){
+    for(y = startY; y<=endY; y++){
       pixelMatrix[x][y][0] = R;
       pixelMatrix[x][y][1] = G;
       pixelMatrix[x][y][2] = B;
