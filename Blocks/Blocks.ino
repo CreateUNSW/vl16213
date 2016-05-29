@@ -171,12 +171,12 @@ void loop() {
   byte index = Serial1.read();
 
   // debug output
-  Serial.println((int)i);
+  Serial.println((int)index);
 
   // sanity check for index
   if( index < 16 ){
     // get respective box index
-    i = sensorBox[index];
+    int i = sensorBox[index];
 
     // increment colour through cycle of 0,1,2,3
     blocks[i].curColour = (blocks[i].curColour+1)%4;
