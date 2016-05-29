@@ -2,30 +2,34 @@
 #include <avr/power.h>
 #include "Blocks.h"
 
-#define NUMPIXELS 45 
+// define?
+#define NUMPIXELS 45
+// maximum number of blocks in a side
 #define NUMBLOCKS 19
+// global variable stores number of blocks in this side
 int numBlocks = 16;
 
+// enumeration for sides
 typedef enum {FRONT, LEFT, RIGHT, BACK} side_t;
-side_t side = RIGHT;
 
+// global side identifier. CHANGE THIS ONE WHEN PROGRAMMING
+side_t side = FRONT;
+
+// enumeration for colours
 #define RED 0
 #define BLUE 1
 #define YELLOW 2
 #define WHITE 3
 
+// frame matrix
 byte pixelMatrix[22][NUMPIXELS][3];
 
-byte redArray[4] =    {125, 125,  125,  0};
-byte greenArray[4] =  {125, 125,  0,    0};
-byte blueArray[4] =   {125,   0,  0,  255};
-
+// blocks array for mondrian side
 blockVar blocks[NUMBLOCKS];
 
 void setup() {
-  randomSeed(analogRead(A0));
   
- //Front
+ // front side block definition
  if(side == FRONT){
    blocks[0] = {0,1,4,11,0};
    blocks[1] = {0,12,4,23,1};
@@ -48,53 +52,61 @@ void setup() {
    blocks[15] = {15,36,19,45,4};
  }
  
-  //right
+  // right side block definition
   else if(side == RIGHT){
     blocks[0] = {0, 0, 6, 13, 0};
     blocks[1] = {0, 14, 6, 20, 1};
     blocks[2] = {0, 22, 3, 29, 2};
-    blocks[3] = {4, 22, 10, 25, 3};     
+    blocks[3] = {4, 22, 10, 25, 3};
+       
     blocks[4] = {4, 26, 10, 29, 1};
     blocks[5] = {0, 30, 5, 36, 2};
     blocks[6] = {0, 38, 9, 44, 3};
     blocks[7] = {7, 0, 10, 8, 1};
+    
     blocks[8] = {7, 10, 10, 21, 2};
     blocks[9] = {6, 30, 14, 37, 3};
     blocks[10] = {11, 0, 21, 6, 1};
     blocks[11] = {10, 38, 14, 44, 0};
+    
     blocks[12] = {11, 7, 14, 21, 2};
     blocks[13] = {11, 22, 16, 29, 3};
     blocks[14] = {15, 7, 19, 14, 0};
     blocks[15] = {20, 7, 21, 16, 1};
-    blocks[16] = {15, 15, 21, 21, 2};  
-    blocks[17] = {17, 22, 21, 29, 3};  
+    
+    blocks[16] = {15, 15, 21, 21, 2};
+    blocks[17] = {17, 22, 21, 29, 3};
     blocks[18] = {15, 30, 21, 44, 1};
     numBlocks = 19;
   }
   
-  // Left
+  // left side block definition
   else if(side == LEFT){
     blocks[0] = {0, 1, 7, 15, 1};
     blocks[1] = {8, 1, 19, 15, 2};
     blocks[2] = {0, 17, 3, 26, 3};
-    blocks[3] = {8, 10, 13, 21, 1};     
+    blocks[3] = {8, 10, 13, 21, 1};
+    
     blocks[4] = {0, 27, 3, 44, 0};
     blocks[5] = {8, 23, 13, 36, 1};
     blocks[6] = {4, 17, 7, 21, 2};
     blocks[7] = {8, 38, 12, 44, 3};
+    
     blocks[8] = {4, 22, 7, 26, 1};
     blocks[9] = {14, 10, 17, 15, 0};
     blocks[10] = {4, 28, 7, 36, 1};
     blocks[11] = {14, 17, 17, 36, 2};
+    
     blocks[12] = {4, 38, 7, 44, 3};
     blocks[13] = {13, 38, 17, 44, 3};
     blocks[14] = {18, 1, 21, 15, 0};
     blocks[15] = {18, 17, 21, 31, 1};
+    
     blocks[16] = {18, 33, 21, 44, 2};
     numBlocks = 17;
   }
 
-  //back
+  // back side block definition
   else {
     blocks[0] = {0,0,9,4,0};
     blocks[1]={0,6,9,14,1};
@@ -121,32 +133,44 @@ void setup() {
     numBlocks = 18;
   }
 
+  // initialise frame with block colours
   for(int i = 0; i < numBlocks; ++i){
     block(blocks[i].x,blocks[i].y,blocks[i].xEnd,blocks[i].yEnd,blocks[i].curColour);
   }
  
   delay(1500);
+  // set up peripherals
   setupStrips();
   Serial.begin(9600);
   Serial1.begin(9600);
 }
 
 void loop() {
+  // update strips
   writeStrips(pixelMatrix);
-  Serial.println("waiting");    
+
+  // wait for input from mega with piezos
   while(!Serial1.available()){}
-  Serial.println("received");
+  
+  // read incoming sensor identifier
   byte i = Serial1.read();
+
+  // debug output
   Serial.println((int)i);
+
+  // sanity check for i
   if( i < numBlocks ){
+    // update respective block
+    // TODO: Needs map to correct block
     blocks[i].curColour = (blocks[i].curColour+1)%4;
     block(blocks[i].x,blocks[i].y,blocks[i].xEnd,blocks[i].yEnd,blocks[i].curColour);
   }
 }
 
-void block(int X, int Y, int Length, int Height, byte colour){
+void block(int X, int Y, int Length, int Height, int colour){
   uint16_t x, y;
   byte R, G, B;
+  // switch case colours: do not increase brightnesses please
   switch (colour) {
     case RED:
         R = 70;
@@ -173,6 +197,9 @@ void block(int X, int Y, int Length, int Height, byte colour){
         G = 0;
         B = 0;
   }
+  
+  // this iteration looks strange:
+  // it goes to length & height, not length + x and height + y
   for(x = X;  x<=Length; x++){
     for(y = Y; y<=Height; y++){
       pixelMatrix[x][y][0] = R;
