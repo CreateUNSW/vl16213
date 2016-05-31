@@ -13,7 +13,7 @@ int numBlocks;
 typedef enum {FRONT, LEFT, RIGHT, BACK} side_t;
 
 // global side identifier. CHANGE THIS ONE WHEN PROGRAMMING
-side_t side = FRONT;
+side_t side = BACK;
 
 // enumeration for colours
 #define RED 0
@@ -31,11 +31,10 @@ blockVar blocks[NUMBLOCKS];
 int *sensorBox;
 
 // matrix definitions for each side
-int boxBack[16] = {14,17,15,12,10,9,3,8,4,1,5,2,0,7,13,16}; //back
+int boxBack[16] = {15,14,16,12,10,9,3,8,4,1,5,2,0,7,12,16}; //back
 int boxLeft[16] = {2,10,16,1,9,5,8,14,4,7,12,13,0,3,11,15}; //left
 int boxFront[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}; //front
-// todo: boxRight
-int boxRight[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}; //front
+int boxRight[16] = {15,10,16,17,18,12,12,11,9,8,7,4,6,0,5,2}; //right
 
 void setup() {
   
@@ -178,6 +177,8 @@ void loop() {
     // get respective box index
     int i = sensorBox[index];
 
+    Serial.print("Box hit: ");
+    Serial.println(i + 1);
     // increment colour through cycle of 0,1,2,3
     blocks[i].curColour = (blocks[i].curColour+1)%4;
 
