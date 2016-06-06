@@ -8,12 +8,13 @@
 #define NUMBLOCKS 19
 // global variable stores number of blocks in this side
 int numBlocks;
+int randGen = 0;
 
 // enumeration for sides
 typedef enum {FRONT, LEFT, RIGHT, BACK} side_t;
 
 // global side identifier. CHANGE THIS ONE WHEN PROGRAMMING
-side_t side = BACK;
+side_t side = FRONT;
 
 // enumeration for colours
 #define RED 0
@@ -33,11 +34,11 @@ int *sensorBox;
 // matrix definitions for each side
 int boxBack[16] = {15,14,16,12,10,9,3,8,4,1,5,2,0,7,12,16}; //back
 int boxLeft[16] = {2,10,16,1,9,5,8,14,4,7,12,13,0,3,11,15}; //left
-int boxFront[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}; //front
-int boxRight[16] = {15,10,16,17,18,12,12,11,9,8,7,4,6,0,5,2}; //right
+int boxFront[16] = {0,4,8,12,1,5,9,13,2,6,10,14,3,7,11,15}; //front
+int boxRight[16] = {14,10,16,17,18,12,11,13,9,8,7,4,6,0,5,2}; //right
 
 void setup() {
-  
+  randomSeed(analogRead(A0));
  // front side block definition
  if(side == FRONT){
    blocks[0] = {0,1,4,11,0};
@@ -175,8 +176,15 @@ void loop() {
   // sanity check for index
   if( index < 16 ){
     // get respective box index
-    int i = sensorBox[index];
-
+    int i;
+    randGen = random(0, 100);
+    // Mondrian Cube has a 20% chance of changing a random block when something is pressed
+    // this is the code to do it
+    if (randGen < 20) {
+        i = random(0, numBlocks);
+    } else {
+        i = sensorBox[index];
+    }
     Serial.print("Box hit: ");
     Serial.println(i + 1);
     // increment colour through cycle of 0,1,2,3

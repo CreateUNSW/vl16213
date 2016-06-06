@@ -24,9 +24,9 @@ void loop() {
 
     /**SPECIAL CASES FOR CERTAIN SIDES, FAULTY SENSORS**/
     // bad sensor on back side
-    /*if(i == 5){
+    if((i == 5)||(i==13)||(i==0)){
       continue;
-    }*/
+    }
     // bad sensor on the front side
     /*if (i == 10){
       continue;
@@ -35,6 +35,7 @@ void loop() {
     // if the sensor movement is above the threshold
     if(abs(currReading-readings[i]) > THRESH){
       // send the sensor number to the Teensy
+      //Serial.print(i);
       Serial.write(i);
       // wait for vibration to subside
       delay(500);
